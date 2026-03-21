@@ -18,7 +18,7 @@ async function swaggerPlugin(app: FastifyInstance) {
           description: 'Servidor local',
         },
         {
-          url: 'https://pipoca-setup.onrender.com',
+          url: 'https://ethos-api-develop.onrender.com/',
           description: 'Servidor Desenvolvimento',
         },
       ],
