@@ -1,17 +1,17 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import healthRoutes from './routes/health'
+import swaggerPlugin from './plugins/swagger'
 
 const server = Fastify()
 
-// Configurar o CORS
 server.register(cors, {
-  origin: '*', // Libera totalmente para testes
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true,
 })
 
-// Registrar rotas de usuários com prefixo
+server.register(swaggerPlugin)
 server.register(healthRoutes, { prefix: '/health' })
 
 // Configurar a porta e host
