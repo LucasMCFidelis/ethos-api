@@ -28,9 +28,13 @@ jobs:
       - name: Run lint
         run: npm run lint --if-present
 
-      # 5️⃣ Build
+      # 5️⃣ Generate Prisma Client + Build
       - name: Build
-        run: npm run build
+        env:
+          DATABASE_URL: "postgresql://user:password@localhost:5432/pipoca"
+        run: |
+          npx prisma generate
+          npm run build
 
       # 6️⃣ Deploy Dev
       - name: Deploy Dev
