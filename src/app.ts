@@ -12,7 +12,12 @@ server.register(cors, {
 })
 
 server.register(swaggerPlugin)
-server.register(healthRoutes, { prefix: '/health' })
+server.register(
+  async (api) => {
+    api.register(healthRoutes, { prefix: '/health' })
+  },
+  { prefix: '/api/v1' },
+)
 
 // Configurar a porta e host
 const PORT = Number(process.env.PORT) || 3000
