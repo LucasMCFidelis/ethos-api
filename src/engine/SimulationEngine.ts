@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto'
 import type {
   AnswerOption,
   SessionState,
@@ -8,15 +7,13 @@ import type {
 } from './types'
 import type { TrackLoader } from './TrackLoader'
 import type { ResultCalculator } from './ResultCalculator'
+import { prisma } from '../lib/prisma'
 
 const MAX_QUESTIONS = 5
 
 export class SimulationEngine {
   private loader: TrackLoader
   private calculator: ResultCalculator
-
-  // Sessões em memória — substituir por SessionRepository (Prisma) em produção
-  private sessions: Map<string, SessionState> = new Map()
 
   constructor(loader: TrackLoader, calculator: ResultCalculator) {
     this.loader = loader
@@ -30,19 +27,10 @@ export class SimulationEngine {
   /**
    * Inicia uma nova sessão e retorna a primeira pergunta (q1).
    */
-  start(trackId: string): { sessionId: string } & NextStepResponse {
+  async start(trackId: string): Promise<{ sessionId: string } & NextStepResponse> {
     const track = this.loader.load(trackId)
 
-    const sessionId = randomUUID()
-    const session: SessionState = {
-      sessionId,
-      trackId,
-      currentQuestionId: 'q1',
-      answeredCount: 0,
-      answers: [],
-    }
-
-    this.sessions.set(sessionId, session)
+    const { id: sessionId } = await prisma.session.create({ data: { trackId } })
 
     const question = track.questions['q1']
 
@@ -66,8 +54,8 @@ export class SimulationEngine {
    * O resultado é determinado quando `next` aponta para uma chave
    * dentro de `results` (e não de `questions`).
    */
-  answer(sessionId: string, questionId: string, answer: AnswerOption): StepResponse {
-    const session = this.getSession(sessionId)
+  async answer(sessionId: string, questionId: string, answer: AnswerOption): Promise<StepResponse> {
+    const session = await this.getSession(sessionId)
     const track = this.loader.load(session.trackId)
 
     if (session.currentQuestionId !== questionId) {
@@ -90,8 +78,7 @@ export class SimulationEngine {
     }
 
     // Registra a resposta
-    session.answers.push({ questionId, answer })
-    session.answeredCount++
+    await prisma.sessionAnswer.create({ data: { questionId, answer, sessionId } })
 
     const nextKey = chosen.next
 
@@ -104,12 +91,19 @@ export class SimulationEngine {
     if (isResult) {
       // Garante que a chave existe em results
       const resultKey = nextKey in track.results ? nextKey : this.fallbackResult(track)
+      await prisma.session.update({
+        where: { id: sessionId },
+        data: { finishedAt: new Date(), resultKey },
+      })
       return this.buildResult(track, resultKey)
     }
 
     // Avança para a próxima pergunta
     const nextQuestion = track.questions[nextKey]
-    session.currentQuestionId = nextKey
+    await prisma.session.update({
+      where: { id: sessionId },
+      data: { currentQuestionId: nextKey },
+    })
 
     return {
       finished: false,
@@ -125,8 +119,8 @@ export class SimulationEngine {
   /**
    * Recupera o resultado de uma sessão.
    */
-  getResult(sessionId: string): FinishedStepResponse {
-    const session = this.getSession(sessionId)
+  async getResult(sessionId: string): Promise<FinishedStepResponse> {
+    const session = await this.getSession(sessionId)
     const track = this.loader.load(session.trackId)
     const lastAnswer = session.answers.at(-1)
 
@@ -163,12 +157,24 @@ export class SimulationEngine {
     }
   }
 
-  private getSession(sessionId: string): SessionState {
-    const session = this.sessions.get(sessionId)
-    if (!session) {
-      throw new Error(`Sessão "${sessionId}" não encontrada.`)
+  private async getSession(sessionId: string): Promise<SessionState> {
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+      include: { answers: { orderBy: { answeredAt: 'asc' } } },
+    })
+
+    if (!session) throw new Error(`Sessão "${sessionId}" não encontrada.`)
+
+    return {
+      sessionId: session.id,
+      trackId: session.trackId,
+      currentQuestionId: session.currentQuestionId,
+      answeredCount: session.answers.length,
+      answers: session.answers.map((a) => ({
+        questionId: a.questionId,
+        answer: a.answer,
+      })),
     }
-    return session
   }
 
   /**

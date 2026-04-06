@@ -50,7 +50,7 @@ export default function sessionsAnswerRoutes(
       }
 
       try {
-        const step = engine.answer(sessionId, questionId, answer)
+        const step = await engine.answer(sessionId, questionId, answer)
         sendSuccess(reply, step)
       } catch (err) {
         const message = (err as Error).message
