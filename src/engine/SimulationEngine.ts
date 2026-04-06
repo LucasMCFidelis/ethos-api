@@ -104,7 +104,7 @@ export class SimulationEngine {
     if (isResult) {
       // Garante que a chave existe em results
       const resultKey = nextKey in track.results ? nextKey : this.fallbackResult(track)
-      return this.buildResult(session, track, resultKey)
+      return this.buildResult(track, resultKey)
     }
 
     // Avança para a próxima pergunta
@@ -137,7 +137,7 @@ export class SimulationEngine {
     const lastQuestion = track.questions[lastAnswer.questionId]
     const resultKey = lastQuestion.options[lastAnswer.answer].next
 
-    return this.buildResult(session, track, resultKey)
+    return this.buildResult(track, resultKey)
   }
 
   // ------------------------------------------------------------------ //
@@ -145,7 +145,6 @@ export class SimulationEngine {
   // ------------------------------------------------------------------ //
 
   private buildResult(
-    session: SessionState,
     track: ReturnType<TrackLoader['load']>,
     resultKey: string,
   ): FinishedStepResponse {
