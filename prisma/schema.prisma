@@ -29,5 +29,6 @@ model SessionAnswer {
 
   session Session @relation(fields: [sessionId], references: [id])
 
+  @@unique([sessionId, questionId])
   @@map("session_answers")
 }

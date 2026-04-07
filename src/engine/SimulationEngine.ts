@@ -72,7 +72,11 @@ export class SimulationEngine {
     }
 
     // Registra a resposta
-    await prisma.sessionAnswer.create({ data: { questionId, answer, sessionId } })
+    await prisma.sessionAnswer.upsert({
+      where: { sessionId_questionId: { sessionId, questionId } },
+      create: { sessionId, questionId, answer },
+      update: { answer, answeredAt: new Date() },
+    })
 
     const nextKey = chosen.next
 
