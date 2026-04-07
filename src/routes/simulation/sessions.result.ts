@@ -30,7 +30,7 @@ export default function sessionsResultRoutes(
     const sessionId = request.params.id
 
     try {
-      const result = engine.getResult(sessionId)
+      const result = await engine.getResult(sessionId)
       sendSuccess(reply, result)
     } catch (err) {
       const message = (err as Error).message
