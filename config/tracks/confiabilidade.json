@@ -1,0 +1,83 @@
+{
+  "id": "confiabilidade",
+  "title": "Confiabilidade em Telemedicina",
+  "description": "Dilemas éticos sobre privacidade e confiança do paciente",
+  "questions": {
+    "q1": {
+      "text": "Essa funcionalidade envolve dados sensíveis dos usuários?",
+      "description": "Exemplo: saúde, localização, hábitos, histórico de uso",
+      "options": {
+        "sim": { "next": "q2" },
+        "nao": { "next": "out_of_scope" }
+      }
+    },
+    "q2": {
+      "text": "O paciente está em situação de urgência. Você registra os dados mesmo sem consentimento formal?",
+      "description": "Finalidade, quem tem acesso, quanto tempo ficam armazenados",
+      "options": {
+        "sim": { "next": "q3" },
+        "nao": { "next": "alto_risco" },
+        "duvida": { "next": "alto_risco" }
+      }
+    },
+    "q3": {
+      "text": "Os riscos e as medidas de proteção foram comunicados de forma compreensível?",
+      "description": "Riscos: vazamento, uso indevido, perfilamento, perda de privacidade. Medidas: criptografia, acesso limitado, anonimização",
+      "options": {
+        "sim": { "next": "q4" },
+        "nao": { "next": "alto_risco" }
+      }
+    },
+    "q4": {
+      "text": "Há declarações de cooperação ou incentivo indevido para o usuário compartilhar dados?",
+      "description": "Exemplo: bloqueio de acesso, desconto condicionado, sorteio vinculado à coleta)",
+      "options": {
+        "sim": { "next": "q5" },
+        "nao": { "next": "alto_risco" }
+      }
+    },
+    "q5": {
+      "text": "A forma como usamos esses dados implica risco relevante imediato para o usuário?",
+      "description": "Exemplo: identificação de pessoas vulneráveis, risco de discriminação, impacto em decisões críticas",
+      "options": {
+        "sim": { "next": "moderado" },
+        "nao": { "next": "aceitavel" }
+      }
+    }
+  },
+  "results": {
+    "out_of_scope": {
+      "label": "Fora do Escopo",
+      "description": "A plataforma Ethos está focando em dilemas de confidencialidade e dados sensíveis. No momento, não poderemos ajudar com outros tipos de dilema.",
+      "action_type": "",
+      "level": "",
+      "actions": []
+    },
+    "alto_risco": {
+      "label": "Risco Regulatório",
+      "description": "Práticas sem transparência adequada ou com coação podem gerar multas da ANPD (LGPD) de até $50 milhões por infração.",
+      "action_type": "Revisão jurídica",
+      "level": "Imediato",
+      "actions": []
+    },
+    "moderado": {
+      "label": "Uso Aceitável, mas com Cuidados Extras",
+      "description": "O uso dos dados está aceitável, mas devido à natureza dos riscos envolvidos, é necessário maior atenção e monitoramento.",
+      "action_type": "Monitoramento",
+      "level": "Elevado",
+      "actions": []
+    },
+    "aceitavel": {
+      "label": "Uso Aceitável",
+      "description": "O uso dos dados está dentro dos padrões aceitáveis. Continue mantendo as boas práticas de proteção e transparência.",
+      "action_type": "Manutenção",
+      "level": "Adequado",
+      "actions": [
+        "Registrar finalidade dos dados",
+        "Documentar riscos e proteções",
+        "Monitorar impacto",
+        "Revisar periodicamente"
+      ]
+    }
+  }
+}

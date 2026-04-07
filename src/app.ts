@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import healthRoutes from './routes/health'
 import swaggerPlugin from './plugins/swagger'
+import simulationRoutes from './routes/simulation'
 
 const server = Fastify()
 
@@ -15,6 +16,7 @@ server.register(swaggerPlugin)
 server.register(
   async (api) => {
     api.register(healthRoutes, { prefix: '/health' })
+    api.register(simulationRoutes, { prefix: '/simulation' })
   },
   { prefix: '/api/v1' },
 )

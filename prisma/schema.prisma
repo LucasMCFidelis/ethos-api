@@ -6,3 +6,29 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Session {
+  id         String    @id @default(uuid()) @db.Uuid
+  trackId    String    @map("track_id") @db.VarChar(50)
+  currentQuestionId  String    @default("q1") @map("current_question_id") @db.VarChar(50)
+  startedAt  DateTime  @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  resultKey  String?   @map("result_key") @db.VarChar(50)
+
+  answers SessionAnswer[]
+
+  @@map("sessions")
+}
+
+model SessionAnswer {
+  id         String   @id @default(uuid()) @db.Uuid
+  sessionId  String   @map("session_id") @db.Uuid
+  questionId String   @map("question_id") @db.VarChar(50)
+  answer     String   @db.VarChar(50)
+  answeredAt DateTime @default(now()) @map("answered_at")
+
+  session Session @relation(fields: [sessionId], references: [id])
+
+  @@unique([sessionId, questionId])
+  @@map("session_answers")
+}
