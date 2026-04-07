@@ -59,10 +59,6 @@ export default function sessionsAnswerRoutes(
           return sendError(reply, `Sessão "${sessionId}" não encontrada.`, 404)
         }
 
-        if (message.includes('Pergunta inesperada')) {
-          return sendError(reply, message, 409)
-        }
-
         sendError(reply, message, 500)
       }
     },

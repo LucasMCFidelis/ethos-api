@@ -58,12 +58,6 @@ export class SimulationEngine {
     const session = await this.getSession(sessionId)
     const track = this.loader.load(session.trackId)
 
-    if (session.currentQuestionId !== questionId) {
-      throw new Error(
-        `Pergunta inesperada. Esperada: "${session.currentQuestionId}", recebida: "${questionId}".`,
-      )
-    }
-
     const question = track.questions[questionId]
     if (!question) {
       throw new Error(`Pergunta "${questionId}" não encontrada na trilha.`)
