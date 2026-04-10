@@ -4,6 +4,7 @@ import type {
   StepResponse,
   NextStepResponse,
   FinishedStepResponse,
+  StepResponded,
 } from './types'
 import type { TrackLoader } from './TrackLoader'
 import type { ResultCalculator } from './ResultCalculator'
@@ -44,6 +45,35 @@ export class SimulationEngine {
         options: Object.keys(question.options), // ← vem do arquivo de configuração
       },
     }
+  }
+
+  async findQuestionResponse(sessionId: string, questionId: string): Promise<StepResponse> {
+    const session = await this.getSession(sessionId)
+    const track = this.loader.load(session.trackId)
+
+    const question = track.questions[questionId]
+    if (!question) {
+      throw new Error(`Pergunta "${questionId}" não encontrada na trilha.`)
+    }
+
+    const questionSavedResponse = await prisma.sessionAnswer.findUnique({
+      where: { sessionId_questionId: { sessionId, questionId } },
+    })
+
+    if (!questionSavedResponse) {
+      throw new Error(`Resposta para "${questionId}" não encontrada na sessão.`)
+    }
+
+    return {
+      finished: false,
+      question: {
+        id: questionId,
+        text: question.text, // ← vem do arquivo de configuração
+        description: question.description, // ← vem do arquivo de configuração
+        options: Object.keys(question.options), // ← vem do arquivo de configuração
+      },
+      savedResponse: questionSavedResponse?.answer || '',
+    } satisfies StepResponded
   }
 
   /**

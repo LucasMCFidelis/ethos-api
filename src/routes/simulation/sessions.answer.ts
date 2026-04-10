@@ -63,4 +63,22 @@ export default function sessionsAnswerRoutes(
       }
     },
   )
+
+  fastify.get<{ Params: AnswerParams & { questionId: string } }>(
+    '/sessions/:id/answer/:questionId',
+    async (request, reply) => {
+      const { id: sessionId, questionId } = request.params
+
+      try {
+        const step = await engine.findQuestionResponse(sessionId, questionId)
+        sendSuccess(reply, step)
+      } catch (err) {
+        const message = (err as Error).message
+        if (message.includes('não encontrada')) {
+          return sendError(reply, message, 404)
+        }
+        sendError(reply, message, 500)
+      }
+    },
+  )
 }

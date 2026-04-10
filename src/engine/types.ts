@@ -39,6 +39,17 @@ export interface AnswerRecord {
   answer: AnswerOption
 }
 
+export interface StepResponded {
+  finished: false
+  question: {
+    id: string
+    text: string
+    description?: string
+    options: AnswerOption[]
+  }
+  savedResponse: AnswerOption
+}
+
 export interface NextStepResponse {
   finished: false
   question: {
@@ -61,4 +72,4 @@ export interface FinishedStepResponse {
   }
 }
 
-export type StepResponse = NextStepResponse | FinishedStepResponse
+export type StepResponse = NextStepResponse | FinishedStepResponse | StepResponded
