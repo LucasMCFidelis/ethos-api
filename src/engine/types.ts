@@ -52,6 +52,7 @@ export interface StepResponded {
 
 export interface NextStepResponse {
   finished: false
+  maxQuestions: number
   question: {
     id: string
     text: string

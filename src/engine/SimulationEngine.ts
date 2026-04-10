@@ -37,6 +37,7 @@ export class SimulationEngine {
 
     return {
       sessionId,
+      maxQuestions: Object.keys(track.questions).length,
       finished: false,
       question: {
         id: 'q1',

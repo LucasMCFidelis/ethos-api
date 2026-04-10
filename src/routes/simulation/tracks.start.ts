@@ -30,8 +30,8 @@ export default function tracksStartRoutes(
     const { id } = request.params
 
     try {
-      const { sessionId, question } = await engine.start(id)
-      sendSuccess(reply, { sessionId, question }, 201)
+      const { sessionId, question, maxQuestions } = await engine.start(id)
+      sendSuccess(reply, { sessionId, question, maxQuestions }, 201)
     } catch (err) {
       const message = (err as Error).message
 
