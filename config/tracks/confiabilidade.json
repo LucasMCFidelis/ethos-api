@@ -58,14 +58,23 @@
       "description": "Práticas sem transparência adequada ou com coação podem gerar multas da ANPD (LGPD) de até $50 milhões por infração.",
       "action_type": "Revisão jurídica",
       "level": "Imediato",
-      "actions": []
+      "actions": [
+        "Revisar comunicações/consentimento",
+        "Reforçar explicação em linguagem simples",
+        "Reavaliar necessidades dos dados",
+        "Registrar motivos de não-validação",
+        "Validar com Jurídico (Multas e LGPD)"
+      ]
     },
     "moderado": {
       "label": "Uso Aceitável, mas com Cuidados Extras",
       "description": "O uso dos dados está aceitável, mas devido à natureza dos riscos envolvidos, é necessário maior atenção e monitoramento.",
       "action_type": "Monitoramento",
       "level": "Elevado",
-      "actions": []
+      "actions": [
+        "Revisão jurídica adicional",
+        "Monitoramento mais rigoroso"
+      ]
     },
     "aceitavel": {
       "label": "Uso Aceitável",
