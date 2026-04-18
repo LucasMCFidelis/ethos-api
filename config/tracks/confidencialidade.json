@@ -1,7 +1,7 @@
 {
-  "id": "confiabilidade",
-  "title": "Confiabilidade em Telemedicina",
-  "description": "Dilemas éticos sobre privacidade e confiança do paciente",
+  "id": "confidencialidade",
+  "title": "Confidencialidade em Telemedicina",
+  "description": "Dilemas éticos sobre confidencialidade e dados sensíveis em telemedicina",
   "questions": {
     "q1": {
       "text": "Essa funcionalidade envolve dados sensíveis dos usuários?",
@@ -71,10 +71,7 @@
       "description": "O uso dos dados está aceitável, mas devido à natureza dos riscos envolvidos, é necessário maior atenção e monitoramento.",
       "action_type": "Monitoramento",
       "level": "Elevado",
-      "actions": [
-        "Revisão jurídica adicional",
-        "Monitoramento mais rigoroso"
-      ]
+      "actions": ["Revisão jurídica adicional", "Monitoramento mais rigoroso"]
     },
     "aceitavel": {
       "label": "Uso Aceitável",

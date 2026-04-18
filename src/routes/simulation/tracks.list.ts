@@ -12,7 +12,7 @@ import { sendSuccess, sendError } from '../helpers'
  *   ok: true,
  *   data: {
  *     tracks: [F
- *       { id: "confiabilidade", title: "...", description: "..." }
+ *       { id: "confidencialidade", title: "...", description: "..." }
  *     ]
  *   }
  * }
