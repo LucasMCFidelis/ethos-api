@@ -5,6 +5,8 @@ import type {
   NextStepResponse,
   FinishedStepResponse,
   StepResponded,
+  Feedback,
+  FeedbackBody,
 } from './types'
 import type { TrackLoader } from './TrackLoader'
 import type { ResultCalculator } from './ResultCalculator'
@@ -161,6 +163,33 @@ export class SimulationEngine {
     const resultKey = lastQuestion.options[lastAnswer.answer].next
 
     return this.buildResult(track, resultKey)
+  }
+
+  /**
+   * Registra o feedback relacionado a simulação realizada
+   */
+  async sendFeedback({
+    sessionId,
+    feedback,
+  }: {
+    sessionId: string
+    feedback: FeedbackBody
+  }): Promise<Feedback> {
+    await this.getSession(sessionId)
+    const { rate, useObjective, suggestion } = feedback
+
+    // Registra o feedback
+    const feedbackResponse = await prisma.simulationFeedback.upsert({
+      where: { sessionId },
+      update: { rate, useObjective, suggestion },
+      create: { sessionId, rate, useObjective, suggestion },
+    })
+
+    return {
+      ...feedbackResponse,
+      sessionId,
+      suggestion: feedbackResponse.suggestion ?? undefined,
+    }
   }
 
   // ------------------------------------------------------------------ //
