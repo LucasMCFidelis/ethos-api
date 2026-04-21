@@ -7,6 +7,7 @@ import type {
   StepResponded,
   Feedback,
   FeedbackBody,
+  Question,
 } from './types'
 import type { TrackLoader } from './TrackLoader'
 import type { ResultCalculator } from './ResultCalculator'
@@ -47,6 +48,21 @@ export class SimulationEngine {
         description: question.description, // ← vem do arquivo de configuração
         options: Object.keys(question.options), // ← vem do arquivo de configuração
       },
+    }
+  }
+
+  findTrackQuestion(trackId: string, questionId: string): Question & { id: string } {
+    const track = this.loader.load(trackId)
+
+    const question = track.questions[questionId]
+
+    if (!question) {
+      throw new Error(`Pergunta "${questionId}" não encontrada na track "${trackId}".`)
+    }
+
+    return {
+      id: questionId,
+      ...question,
     }
   }
 

@@ -10,6 +10,7 @@ import tracksStartRoutes from './tracks.start'
 import sessionsAnswerRoutes from './sessions.answer'
 import sessionsResultRoutes from './sessions.result'
 import sessionsFeedbackRoutes from './sessions.feedback'
+import trackQuestionsRoutes from './tracks.questions'
 
 /**
  * Plugin Fastify que registra todas as rotas da simulação.
@@ -26,6 +27,7 @@ export default async function simulationRoutes(fastify: FastifyInstance): Promis
   const engine = new SimulationEngine(loader, calculator)
 
   tracksListRoutes(fastify, loader)
+  trackQuestionsRoutes(fastify, engine)
   tracksStartRoutes(fastify, engine)
   sessionsAnswerRoutes(fastify, engine)
   sessionsResultRoutes(fastify, engine)
