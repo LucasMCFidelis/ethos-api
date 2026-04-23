@@ -13,6 +13,7 @@ server.register(cors, {
 })
 
 server.register(swaggerPlugin)
+server.get('/', (_, reply) => reply.redirect('/api/v1/docs'))
 server.register(
   async (api) => {
     api.register(healthRoutes, { prefix: '/health' })
