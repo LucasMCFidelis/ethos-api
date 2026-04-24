@@ -7,9 +7,9 @@ import { SimulationEngine } from '../../engine/SimulationEngine'
 
 import tracksListRoutes from './tracks/tracks.list'
 import tracksStartRoutes from './tracks/tracks.start'
-import sessionsAnswerRoutes from './sessions.answer'
-import sessionsResultRoutes from './sessions.result'
-import sessionsFeedbackRoutes from './sessions.feedback'
+import sessionsAnswerRoutes from './sessions/sessions.answer'
+import sessionsResultRoutes from './sessions/sessions.result'
+import sessionsFeedbackRoutes from './sessions/sessions.feedback'
 import trackQuestionsRoutes from './tracks/tracks.questions'
 
 /**

@@ -1,37 +1,20 @@
 import type { FastifyInstance } from 'fastify'
-import type { SimulationEngine } from '../../engine/SimulationEngine'
-import { sendSuccess, sendError } from '../helpers'
-import type { FeedbackBody } from '../../engine/types'
+import type { SimulationEngine } from '../../../engine/SimulationEngine'
+import { sendSuccess, sendError } from '../../helpers'
+import type { FeedbackBody } from '../../../engine/types'
+import { sessionFeedbackSchema } from './schemas/sessions.feedback.schema'
 
 interface FeedbackParams {
   id: string
 }
 
-/**
- * POST /sessions/:id/feedback
- *
- * Registra o feedback da simulação.
- *
- * Body:
- * {
- *   "rate": number,
- *   "useObjective": string,
- *   "suggestion"?: string
- * }
- *
- * Response 200:
- * { ok: true, data: Feedback }
- *
- * Response 400: body inválido
- * Response 404: sessão não encontrada
- */
 export default function sessionsFeedbackRoutes(
   fastify: FastifyInstance,
   engine: SimulationEngine,
 ): void {
-  fastify.post<{ Params: FeedbackParams; Body: FeedbackBody }>(
-    '/sessions/:id/feedback',
-    async (request, reply) => {
+  fastify.post<{ Params: FeedbackParams; Body: FeedbackBody }>('/sessions/:id/feedback', {
+    schema: sessionFeedbackSchema,
+    handler: async (request, reply) => {
       const sessionId = request.params.id
       const { rate, useObjective, suggestion } = request.body ?? {}
 
@@ -60,5 +43,5 @@ export default function sessionsFeedbackRoutes(
         sendError(reply, message, 500)
       }
     },
-  )
+  })
 }
