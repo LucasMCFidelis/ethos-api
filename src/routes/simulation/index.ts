@@ -5,12 +5,12 @@ import { TrackLoader } from '../../engine/TrackLoader'
 import { ResultCalculator } from '../../engine/ResultCalculator'
 import { SimulationEngine } from '../../engine/SimulationEngine'
 
-import tracksListRoutes from './tracks.list'
-import tracksStartRoutes from './tracks.start'
+import tracksListRoutes from './tracks/tracks.list'
+import tracksStartRoutes from './tracks/tracks.start'
 import sessionsAnswerRoutes from './sessions.answer'
 import sessionsResultRoutes from './sessions.result'
 import sessionsFeedbackRoutes from './sessions.feedback'
-import trackQuestionsRoutes from './tracks.questions'
+import trackQuestionsRoutes from './tracks/tracks.questions'
 
 /**
  * Plugin Fastify que registra todas as rotas da simulação.

@@ -2,6 +2,7 @@ import fp from 'fastify-plugin'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
 import type { FastifyInstance } from 'fastify'
+import { swaggerTags } from '../utils/swagger.tags'
 
 async function swaggerPlugin(app: FastifyInstance) {
   await app.register(fastifySwagger, {
@@ -22,7 +23,7 @@ async function swaggerPlugin(app: FastifyInstance) {
           description: 'Servidor Desenvolvimento',
         },
       ],
-      tags: [{ name: 'Health', description: 'Monitoramento da API' }],
+      tags: Object.values(swaggerTags),
     },
   })
 

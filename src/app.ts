@@ -4,7 +4,13 @@ import healthRoutes from './routes/health'
 import swaggerPlugin from './plugins/swagger'
 import simulationRoutes from './routes/simulation'
 
-const server = Fastify()
+const server = Fastify({
+  ajv: {
+    customOptions: {
+      keywords: ['example'],
+    },
+  },
+})
 
 server.register(cors, {
   origin: '*',
