@@ -3,7 +3,7 @@ import { swaggerTags } from '../../../../utils/swagger.tags'
 export const sessionAnswerParamsSchema = {
   type: 'object',
   properties: {
-    id: { type: 'string', format: 'uuid', description: 'ID da sessão' },
+    id: { type: 'string', description: 'ID da sessão' },
   },
   required: ['id'],
 }
@@ -64,12 +64,11 @@ export const finishedStepSchema = {
 }
 
 export const sessionAnswerRegisterResponseSchema = {
-  200: {
-    description: 'Próxima pergunta ou resultado final da trilha',
-    oneOf: [
-      { ...nextStepSchema, title: 'Próxima pergunta' },
-      { ...finishedStepSchema, title: 'Resultado final' },
-    ],
+  '2xx': {
+    description:
+      'Próxima pergunta (`finished: false`, retorna `question`) ou resultado final (`finished: true`, retorna `result`).',
+    type: 'object',
+    additionalProperties: true,
   },
   400: {
     description: 'Body inválido — questionId ausente ou answer não permitido',
@@ -109,7 +108,7 @@ export const sessionAnswerRegisterResponseSchema = {
 export const sessionAnswerGetParamsSchema = {
   type: 'object',
   properties: {
-    id: { type: 'string', format: 'uuid', description: 'ID da sessão' },
+    id: { type: 'string', description: 'ID da sessão' },
     questionId: { type: 'string', description: 'ID da pergunta', example: 'q1' },
   },
   required: ['id', 'questionId'],
@@ -165,7 +164,6 @@ export const sessionAnswerRegisterSchema = {
       questionId: { type: 'string', description: 'ID da pergunta respondida', example: 'q1' },
       answer: { type: 'string', description: 'Resposta selecionada', example: 'sim' },
     },
-    required: ['questionId', 'answer'],
   },
   response: sessionAnswerRegisterResponseSchema,
 }
