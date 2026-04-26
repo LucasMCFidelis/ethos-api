@@ -4,7 +4,13 @@ import healthRoutes from './routes/health'
 import swaggerPlugin from './plugins/swagger'
 import simulationRoutes from './routes/simulation'
 
-const server = Fastify()
+const server = Fastify({
+  ajv: {
+    customOptions: {
+      keywords: ['example'],
+    },
+  },
+})
 
 server.register(cors, {
   origin: '*',
@@ -13,6 +19,7 @@ server.register(cors, {
 })
 
 server.register(swaggerPlugin)
+server.get('/', (_, reply) => reply.redirect('/api/v1/docs'))
 server.register(
   async (api) => {
     api.register(healthRoutes, { prefix: '/health' })

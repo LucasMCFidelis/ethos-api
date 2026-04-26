@@ -4,6 +4,10 @@ import type {
   StepResponse,
   NextStepResponse,
   FinishedStepResponse,
+  StepResponded,
+  Feedback,
+  FeedbackBody,
+  Question,
 } from './types'
 import type { TrackLoader } from './TrackLoader'
 import type { ResultCalculator } from './ResultCalculator'
@@ -36,6 +40,7 @@ export class SimulationEngine {
 
     return {
       sessionId,
+      maxQuestions: Object.keys(track.questions).length,
       finished: false,
       question: {
         id: 'q1',
@@ -44,6 +49,50 @@ export class SimulationEngine {
         options: Object.keys(question.options), // ← vem do arquivo de configuração
       },
     }
+  }
+
+  findTrackQuestion(trackId: string, questionId: string): Question & { id: string } {
+    const track = this.loader.load(trackId)
+
+    const question = track.questions[questionId]
+
+    if (!question) {
+      throw new Error(`Pergunta "${questionId}" não encontrada na track "${trackId}".`)
+    }
+
+    return {
+      id: questionId,
+      ...question,
+    }
+  }
+
+  async findQuestionResponse(sessionId: string, questionId: string): Promise<StepResponse> {
+    const session = await this.getSession(sessionId)
+    const track = this.loader.load(session.trackId)
+
+    const question = track.questions[questionId]
+    if (!question) {
+      throw new Error(`Pergunta "${questionId}" não encontrada na trilha.`)
+    }
+
+    const questionSavedResponse = await prisma.sessionAnswer.findUnique({
+      where: { sessionId_questionId: { sessionId, questionId } },
+    })
+
+    if (!questionSavedResponse) {
+      throw new Error(`Resposta para "${questionId}" não encontrada na sessão.`)
+    }
+
+    return {
+      finished: false,
+      question: {
+        id: questionId,
+        text: question.text, // ← vem do arquivo de configuração
+        description: question.description, // ← vem do arquivo de configuração
+        options: Object.keys(question.options), // ← vem do arquivo de configuração
+      },
+      savedResponse: questionSavedResponse?.answer || '',
+    } satisfies StepResponded
   }
 
   /**
@@ -130,6 +179,33 @@ export class SimulationEngine {
     const resultKey = lastQuestion.options[lastAnswer.answer].next
 
     return this.buildResult(track, resultKey)
+  }
+
+  /**
+   * Registra o feedback relacionado a simulação realizada
+   */
+  async sendFeedback({
+    sessionId,
+    feedback,
+  }: {
+    sessionId: string
+    feedback: FeedbackBody
+  }): Promise<Feedback> {
+    await this.getSession(sessionId)
+    const { rate, useObjective, suggestion } = feedback
+
+    // Registra o feedback
+    const feedbackResponse = await prisma.simulationFeedback.upsert({
+      where: { sessionId },
+      update: { rate, useObjective, suggestion },
+      create: { sessionId, rate, useObjective, suggestion },
+    })
+
+    return {
+      ...feedbackResponse,
+      sessionId,
+      suggestion: feedbackResponse.suggestion ?? undefined,
+    }
   }
 
   // ------------------------------------------------------------------ //

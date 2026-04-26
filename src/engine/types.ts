@@ -1,3 +1,5 @@
+import type { Session } from '../generated/prisma/browser'
+
 export type AnswerOption = string
 
 export interface QuestionOption {
@@ -39,8 +41,20 @@ export interface AnswerRecord {
   answer: AnswerOption
 }
 
+export interface StepResponded {
+  finished: false
+  question: {
+    id: string
+    text: string
+    description?: string
+    options: AnswerOption[]
+  }
+  savedResponse: AnswerOption
+}
+
 export interface NextStepResponse {
   finished: false
+  maxQuestions?: number
   question: {
     id: string
     text: string
@@ -61,4 +75,16 @@ export interface FinishedStepResponse {
   }
 }
 
-export type StepResponse = NextStepResponse | FinishedStepResponse
+export interface FeedbackBody {
+  rate: number
+  useObjective: string
+  suggestion?: string
+}
+
+export interface Feedback extends FeedbackBody {
+  sessionId: string
+  createdAt: Date
+  session?: Session
+}
+
+export type StepResponse = NextStepResponse | FinishedStepResponse | StepResponded
