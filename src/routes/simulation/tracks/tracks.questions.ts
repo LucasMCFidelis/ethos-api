@@ -28,6 +28,10 @@ export default function trackQuestionsRoutes(
     handler: async (request, reply) => {
       const { trackId, questionId } = request.params
 
+      if (!questionId) {
+        sendError(reply, 'O parâmetro questionId é obrigatório')
+      }
+
       try {
         const question = engine.findTrackQuestion(trackId, questionId)
         return sendSuccess(reply, question)
