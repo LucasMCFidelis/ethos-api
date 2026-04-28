@@ -208,6 +208,26 @@ export class SimulationEngine {
     }
   }
 
+  async getSession(sessionId: string): Promise<SessionState> {
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+      include: { answers: { orderBy: { answeredAt: 'asc' } } },
+    })
+
+    if (!session) throw new Error(`Sessão "${sessionId}" não encontrada.`)
+
+    return {
+      sessionId: session.id,
+      trackId: session.trackId,
+      currentQuestionId: session.currentQuestionId,
+      answeredCount: session.answers.length,
+      answers: session.answers.map((a) => ({
+        questionId: a.questionId,
+        answer: a.answer,
+      })),
+    }
+  }
+
   // ------------------------------------------------------------------ //
   //  Privado
   // ------------------------------------------------------------------ //
@@ -228,26 +248,6 @@ export class SimulationEngine {
         level: result.level,
         actions: result.actions,
       },
-    }
-  }
-
-  private async getSession(sessionId: string): Promise<SessionState> {
-    const session = await prisma.session.findUnique({
-      where: { id: sessionId },
-      include: { answers: { orderBy: { answeredAt: 'asc' } } },
-    })
-
-    if (!session) throw new Error(`Sessão "${sessionId}" não encontrada.`)
-
-    return {
-      sessionId: session.id,
-      trackId: session.trackId,
-      currentQuestionId: session.currentQuestionId,
-      answeredCount: session.answers.length,
-      answers: session.answers.map((a) => ({
-        questionId: a.questionId,
-        answer: a.answer,
-      })),
     }
   }
 
