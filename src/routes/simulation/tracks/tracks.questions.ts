@@ -34,6 +34,10 @@ export default function trackQuestionsRoutes(
       } catch (err) {
         const message = (err as Error).message
 
+        if (message.includes('Arquivo de trilha não encontrado')) {
+          return sendError(reply, `Arquivo da trilha ${trackId} não encontrado`, 404)
+        }
+
         if (message.includes('não encontrada')) {
           return sendError(reply, message, 404)
         }
