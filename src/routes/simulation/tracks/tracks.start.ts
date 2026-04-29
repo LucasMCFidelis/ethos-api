@@ -1,8 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import type { SimulationEngine } from '../../../engine/SimulationEngine'
-import { sendSuccess, sendError } from '../../helpers'
+import { sendSuccess } from '../../helpers'
 import { swaggerTags } from '../../../utils/swagger.tags'
 import { tracksStartParamsSchema, tracksStartResponseSchema } from './schemas/tracks.start.schema'
+import { handleError } from '../../../errors/handleError'
 
 interface StartParams {
   id: string
@@ -28,13 +29,7 @@ export default function tracksStartRoutes(
         const { sessionId, question, maxQuestions } = await engine.start(id)
         sendSuccess(reply, { sessionId, finished: false, question, maxQuestions }, 201)
       } catch (err) {
-        const message = (err as Error).message
-
-        if (message.includes('não encontrado')) {
-          return sendError(reply, `Trilha "${id}" não encontrada.`, 404)
-        }
-
-        sendError(reply, message, 500)
+        handleError(reply, err)
       }
     },
   })

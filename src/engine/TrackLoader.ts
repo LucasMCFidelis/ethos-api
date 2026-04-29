@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import type { Track, Question } from './types'
+import { BadRequestError, NotFoundError } from '../errors/httpErrors'
 
 const TRACKS_DIR = path.resolve(process.cwd(), 'config/tracks')
 
@@ -12,6 +13,10 @@ export class TrackLoader {
   // ------------------------------------------------------------------ //
 
   load(trackId: string): Track {
+    if (!trackId) {
+      throw new BadRequestError('O parâmetro trackId é obrigatório')
+    }
+
     if (this.cache.has(trackId)) return this.cache.get(trackId)!
 
     const filePath = path.join(TRACKS_DIR, `${trackId}.json`)
@@ -25,7 +30,7 @@ export class TrackLoader {
 
   listAvailable(): string[] {
     if (!fs.existsSync(TRACKS_DIR)) {
-      throw new Error(`Diretório de trilhas não encontrado: ${TRACKS_DIR}`)
+      throw new NotFoundError(`Diretório de trilhas não encontrado: ${TRACKS_DIR}`)
     }
     return fs
       .readdirSync(TRACKS_DIR)
@@ -43,7 +48,7 @@ export class TrackLoader {
 
   private readFile(filePath: string): string {
     if (!fs.existsSync(filePath)) {
-      throw new Error(`Arquivo de trilha não encontrado: ${filePath}`)
+      throw new NotFoundError(`Arquivo de trilha não encontrado: ${filePath}`)
     }
     return fs.readFileSync(filePath, 'utf-8')
   }
@@ -52,7 +57,7 @@ export class TrackLoader {
     try {
       return JSON.parse(raw)
     } catch {
-      throw new Error(`JSON inválido no arquivo de trilha: ${filePath}`)
+      throw new NotFoundError(`JSON inválido no arquivo de trilha: ${filePath}`)
     }
   }
 
@@ -62,7 +67,7 @@ export class TrackLoader {
 
   private validate(data: unknown): Track {
     if (typeof data !== 'object' || data === null) {
-      throw new Error('Trilha deve ser um objeto JSON.')
+      throw new BadRequestError('Trilha deve ser um objeto JSON.')
     }
 
     const raw = data as Record<string, unknown>
@@ -93,22 +98,22 @@ export class TrackLoader {
 
     for (const [qId, qData] of Object.entries(raw)) {
       if (typeof qData !== 'object' || qData === null) {
-        throw new Error(`Pergunta "${qId}" deve ser um objeto.`)
+        throw new BadRequestError(`Pergunta "${qId}" deve ser um objeto.`)
       }
 
       const q = qData as Record<string, unknown>
 
       if (typeof q.text !== 'string' || q.text.trim() === '') {
-        throw new Error(`Pergunta "${qId}": campo "text" ausente ou vazio.`)
+        throw new BadRequestError(`Pergunta "${qId}": campo "text" ausente ou vazio.`)
       }
 
       // description é opcional
       if (q.description !== undefined && typeof q.description !== 'string') {
-        throw new Error(`Pergunta "${qId}": campo "description" deve ser string.`)
+        throw new BadRequestError(`Pergunta "${qId}": campo "description" deve ser string.`)
       }
 
       if (typeof q.options !== 'object' || q.options === null) {
-        throw new Error(`Pergunta "${qId}": campo "options" ausente.`)
+        throw new BadRequestError(`Pergunta "${qId}": campo "options" ausente.`)
       }
 
       const options = q.options as Record<string, unknown>
@@ -116,13 +121,13 @@ export class TrackLoader {
 
       for (const [optKey, optData] of Object.entries(options)) {
         if (typeof optData !== 'object' || optData === null) {
-          throw new Error(`Pergunta "${qId}", opção "${optKey}": deve ser um objeto.`)
+          throw new BadRequestError(`Pergunta "${qId}", opção "${optKey}": deve ser um objeto.`)
         }
 
         const opt = optData as Record<string, unknown>
 
         if (typeof opt.next !== 'string' || opt.next.trim() === '') {
-          throw new Error(
+          throw new BadRequestError(
             `Pergunta "${qId}", opção "${optKey}": campo "next" deve ser string não vazia.`,
           )
         }
@@ -144,12 +149,12 @@ export class TrackLoader {
     const results: Track['results'] = {}
 
     if (Object.keys(raw).length === 0) {
-      throw new Error('Campo "results" não pode estar vazio.')
+      throw new BadRequestError('Campo "results" não pode estar vazio.')
     }
 
     for (const [key, value] of Object.entries(raw)) {
       if (typeof value !== 'object' || value === null) {
-        throw new Error(`Resultado "${key}" deve ser um objeto.`)
+        throw new BadRequestError(`Resultado "${key}" deve ser um objeto.`)
       }
 
       const r = value as Record<string, unknown>
@@ -160,7 +165,7 @@ export class TrackLoader {
       this.assertResultString(r, key, 'level')
 
       if (!Array.isArray(r.actions)) {
-        throw new Error(`Resultado "${key}": campo "actions" deve ser um array.`)
+        throw new BadRequestError(`Resultado "${key}": campo "actions" deve ser um array.`)
       }
 
       results[key] = {
@@ -203,25 +208,27 @@ export class TrackLoader {
 
   private assertString(obj: Record<string, unknown>, key: string): void {
     if (typeof obj[key] !== 'string' || (obj[key] as string).trim() === '') {
-      throw new Error(`Campo "${key}" ausente ou inválido na trilha.`)
+      throw new BadRequestError(`Campo "${key}" ausente ou inválido na trilha.`)
     }
   }
 
   private assertObject(obj: Record<string, unknown>, key: string): void {
     if (typeof obj[key] !== 'object' || obj[key] === null) {
-      throw new Error(`Campo "${key}" deve ser um objeto na trilha.`)
+      throw new BadRequestError(`Campo "${key}" deve ser um objeto na trilha.`)
     }
   }
 
   private assertResultString(r: Record<string, unknown>, resultKey: string, field: string): void {
     if (typeof r[field] !== 'string') {
-      throw new Error(`Resultado "${resultKey}": campo "${field}" deve ser string.`)
+      throw new BadRequestError(`Resultado "${resultKey}": campo "${field}" deve ser string.`)
     }
   }
 
   private assertFirstQuestionExists(questions: Track['questions']): void {
     if (!('q1' in questions)) {
-      throw new Error('A trilha deve conter uma pergunta com id "q1" como ponto de entrada.')
+      throw new BadRequestError(
+        'A trilha deve conter uma pergunta com id "q1" como ponto de entrada.',
+      )
     }
   }
 }

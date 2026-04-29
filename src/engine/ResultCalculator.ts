@@ -1,3 +1,4 @@
+import { NotFoundError } from '../errors/httpErrors'
 import type { Track } from './types'
 
 export interface CalculatedResult {
@@ -19,7 +20,9 @@ export class ResultCalculator {
     const band = track.results[resultKey]
 
     if (!band) {
-      throw new Error(`Chave de resultado "${resultKey}" não encontrada na trilha "${track.id}".`)
+      throw new NotFoundError(
+        `Chave de resultado "${resultKey}" não encontrada na trilha "${track.id}".`,
+      )
     }
 
     return {
