@@ -13,8 +13,6 @@ export const sessionFeedbackBodySchema = {
   properties: {
     rate: {
       type: 'number',
-      minimum: 1,
-      maximum: 5,
       description: 'Avaliação da simulação de 1 a 5',
       example: 4,
     },
