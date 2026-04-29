@@ -3,6 +3,7 @@ import type { SimulationEngine } from '../../../engine/SimulationEngine'
 import { sendSuccess } from '../../helpers'
 import { prisma } from '../../../lib/prisma'
 import { handleError } from '../../../errors/handleError'
+import { sessionDeleteSchema } from './schemas/session.delete.schema'
 
 interface AnswerParams {
   id: string
@@ -13,7 +14,7 @@ export default function sessionsDeleteRoute(
   engine: SimulationEngine,
 ): void {
   fastify.delete<{ Params: AnswerParams }>('/sessions/:id', {
-    // schema: ,
+    schema: sessionDeleteSchema,
     handler: async (request, reply) => {
       const sessionId = request.params.id
 
