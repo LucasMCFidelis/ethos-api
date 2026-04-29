@@ -18,7 +18,6 @@ export default function sessionsFeedbackRoutes(
     schema: sessionFeedbackSchema,
     handler: async (request, reply) => {
       const sessionId = request.params.id
-      console.log(sessionId)
 
       const { rate, useObjective, suggestion } = request.body ?? {}
 

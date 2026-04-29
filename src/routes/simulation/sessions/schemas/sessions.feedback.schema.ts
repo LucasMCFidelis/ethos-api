@@ -30,7 +30,6 @@ export const sessionFeedbackBodySchema = {
       example: 'Adicionar mais perguntas sobre engenharia social',
     },
   },
-  required: ['rate', 'useObjective'],
 }
 
 export const sessionFeedbackResponseSchema = {
