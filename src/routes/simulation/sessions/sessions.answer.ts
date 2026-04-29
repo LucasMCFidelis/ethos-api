@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import type { SimulationEngine } from '../../../engine/SimulationEngine'
-import { sendSuccess, sendError, isValidAnswer } from '../../helpers'
+import { sendSuccess, sendError } from '../../helpers'
 import {
   sessionAnswerGetSchema,
   sessionAnswerRegisterSchema,
@@ -30,12 +30,6 @@ export default function sessionsAnswerRoutes(
       try {
         if (!questionId || typeof questionId !== 'string') {
           throw new BadRequestError('Campo "questionId" é obrigatório e deve ser string.')
-        }
-
-        if (!isValidAnswer(answer)) {
-          throw new BadRequestError(
-            'Campo "answer" é obrigatório e deve ser "sim", "nao" ou "talvez".',
-          )
         }
 
         const step = await engine.answer(sessionId, questionId, answer)
