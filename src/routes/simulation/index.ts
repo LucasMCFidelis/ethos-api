@@ -11,6 +11,7 @@ import sessionsAnswerRoutes from './sessions/sessions.answer'
 import sessionsResultRoutes from './sessions/sessions.result'
 import sessionsFeedbackRoutes from './sessions/sessions.feedback'
 import trackQuestionsRoutes from './tracks/tracks.questions'
+import sessionsDeleteRoute from './sessions/sessions.delete'
 
 /**
  * Plugin Fastify que registra todas as rotas da simulação.
@@ -29,6 +30,7 @@ export default async function simulationRoutes(fastify: FastifyInstance): Promis
   tracksListRoutes(fastify, loader)
   trackQuestionsRoutes(fastify, engine)
   tracksStartRoutes(fastify, engine)
+  sessionsDeleteRoute(fastify, engine)
   sessionsAnswerRoutes(fastify, engine)
   sessionsResultRoutes(fastify, engine)
   sessionsFeedbackRoutes(fastify, engine)

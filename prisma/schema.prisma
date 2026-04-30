@@ -28,7 +28,7 @@ model SessionAnswer {
   answer     String   @db.VarChar(50)
   answeredAt DateTime @default(now()) @map("answered_at")
 
-  session Session @relation(fields: [sessionId], references: [id])
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, questionId])
   @@map("session_answers")
@@ -42,7 +42,7 @@ model SimulationFeedback {
   useObjective String  @map("use_objective") @db.VarChar(100)
   suggestion  String?  @db.Text
 
-  session Session? @relation(fields: [sessionId], references: [id])
+  session Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@map("feedbacks")
 }

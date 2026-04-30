@@ -1,11 +1,12 @@
 import type { FastifyInstance } from 'fastify'
 import type { SimulationEngine } from '../../../engine/SimulationEngine'
-import { sendSuccess, sendError } from '../../helpers'
+import { sendSuccess } from '../../helpers'
 import {
   trackQuestionParamsSchema,
   trackQuestionResponseSchema,
 } from './schemas/tracks.questions.schema'
 import { swaggerTags } from '../../../utils/swagger.tags'
+import { handleError } from '../../../errors/handleError'
 
 interface QuestionParams {
   trackId: string
@@ -32,13 +33,7 @@ export default function trackQuestionsRoutes(
         const question = engine.findTrackQuestion(trackId, questionId)
         return sendSuccess(reply, question)
       } catch (err) {
-        const message = (err as Error).message
-
-        if (message.includes('não encontrada')) {
-          return sendError(reply, message, 404)
-        }
-
-        return sendError(reply, message, 500)
+        handleError(reply, err)
       }
     },
   })

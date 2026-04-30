@@ -12,6 +12,7 @@ import type {
 import type { TrackLoader } from './TrackLoader'
 import type { ResultCalculator } from './ResultCalculator'
 import { prisma } from '../lib/prisma'
+import { BadRequestError, NotFoundError } from '../errors/httpErrors'
 
 const MAX_QUESTIONS = 5
 
@@ -54,16 +55,16 @@ export class SimulationEngine {
   findTrackQuestion(trackId: string, questionId: string): Question & { id: string } {
     const track = this.loader.load(trackId)
 
+    if (!questionId) {
+      throw new BadRequestError('O parâmetro questionId é obrigatório')
+    }
     const question = track.questions[questionId]
 
     if (!question) {
-      throw new Error(`Pergunta "${questionId}" não encontrada na track "${trackId}".`)
+      throw new NotFoundError(`Pergunta "${questionId}" não encontrada na trilha "${trackId}".`)
     }
 
-    return {
-      id: questionId,
-      ...question,
-    }
+    return { id: questionId, ...question }
   }
 
   async findQuestionResponse(sessionId: string, questionId: string): Promise<StepResponse> {
@@ -72,7 +73,7 @@ export class SimulationEngine {
 
     const question = track.questions[questionId]
     if (!question) {
-      throw new Error(`Pergunta "${questionId}" não encontrada na trilha.`)
+      throw new NotFoundError(`Pergunta "${questionId}" não encontrada na trilha.`)
     }
 
     const questionSavedResponse = await prisma.sessionAnswer.findUnique({
@@ -80,7 +81,7 @@ export class SimulationEngine {
     })
 
     if (!questionSavedResponse) {
-      throw new Error(`Resposta para "${questionId}" não encontrada na sessão.`)
+      throw new NotFoundError(`Resposta para "${questionId}" não encontrada na sessão.`)
     }
 
     return {
@@ -109,13 +110,13 @@ export class SimulationEngine {
 
     const question = track.questions[questionId]
     if (!question) {
-      throw new Error(`Pergunta "${questionId}" não encontrada na trilha.`)
+      throw new NotFoundError(`Pergunta "${questionId}" não encontrada na trilha.`)
     }
 
     const chosen = question.options[answer]
     if (!chosen) {
       const valid = Object.keys(question.options).join(', ')
-      throw new Error(
+      throw new BadRequestError(
         `Opção "${answer}" inválida para a pergunta "${questionId}". Válidas: ${valid}.`,
       )
     }
@@ -208,6 +209,29 @@ export class SimulationEngine {
     }
   }
 
+  async getSession(sessionId: string): Promise<SessionState> {
+    if (!sessionId) {
+      throw new BadRequestError('O parâmetro sessionId é obrigatório.')
+    }
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+      include: { answers: { orderBy: { answeredAt: 'asc' } } },
+    })
+
+    if (!session) throw new NotFoundError(`Sessão "${sessionId}" não encontrada.`)
+
+    return {
+      sessionId: session.id,
+      trackId: session.trackId,
+      currentQuestionId: session.currentQuestionId,
+      answeredCount: session.answers.length,
+      answers: session.answers.map((a) => ({
+        questionId: a.questionId,
+        answer: a.answer,
+      })),
+    }
+  }
+
   // ------------------------------------------------------------------ //
   //  Privado
   // ------------------------------------------------------------------ //
@@ -228,26 +252,6 @@ export class SimulationEngine {
         level: result.level,
         actions: result.actions,
       },
-    }
-  }
-
-  private async getSession(sessionId: string): Promise<SessionState> {
-    const session = await prisma.session.findUnique({
-      where: { id: sessionId },
-      include: { answers: { orderBy: { answeredAt: 'asc' } } },
-    })
-
-    if (!session) throw new Error(`Sessão "${sessionId}" não encontrada.`)
-
-    return {
-      sessionId: session.id,
-      trackId: session.trackId,
-      currentQuestionId: session.currentQuestionId,
-      answeredCount: session.answers.length,
-      answers: session.answers.map((a) => ({
-        questionId: a.questionId,
-        answer: a.answer,
-      })),
     }
   }
 

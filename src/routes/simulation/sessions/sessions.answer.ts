@@ -1,10 +1,12 @@
 import type { FastifyInstance } from 'fastify'
 import type { SimulationEngine } from '../../../engine/SimulationEngine'
-import { sendSuccess, sendError, isValidAnswer } from '../../helpers'
+import { sendSuccess, sendError } from '../../helpers'
 import {
   sessionAnswerGetSchema,
   sessionAnswerRegisterSchema,
 } from './schemas/sessions.answer.schema'
+import { handleError } from '../../../errors/handleError'
+import { BadRequestError } from '../../../errors/httpErrors'
 
 interface AnswerParams {
   id: string
@@ -25,25 +27,15 @@ export default function sessionsAnswerRoutes(
       const sessionId = request.params.id
       const { questionId, answer } = request.body ?? {}
 
-      if (!questionId || typeof questionId !== 'string') {
-        return sendError(reply, 'Campo "questionId" é obrigatório e deve ser string.')
-      }
-
-      if (!isValidAnswer(answer)) {
-        return sendError(reply, 'Campo "answer" é obrigatório e deve ser "sim", "nao" ou "talvez".')
-      }
-
       try {
+        if (!questionId || typeof questionId !== 'string') {
+          throw new BadRequestError('Campo "questionId" é obrigatório e deve ser string.')
+        }
+
         const step = await engine.answer(sessionId, questionId, answer)
         sendSuccess(reply, step)
       } catch (err) {
-        const message = (err as Error).message
-
-        if (message.includes('não encontrada')) {
-          return sendError(reply, `Sessão "${sessionId}" não encontrada.`, 404)
-        }
-
-        sendError(reply, message, 500)
+        handleError(reply, err)
       }
     },
   })

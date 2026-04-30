@@ -1,8 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import type { TrackLoader } from '../../../engine/TrackLoader'
-import { sendSuccess, sendError } from '../../helpers'
+import { sendSuccess } from '../../helpers'
 import { tracksListResponseSchema } from './schemas/tracks.list.schema'
 import { swaggerTags } from '../../../utils/swagger.tags'
+import { handleError } from '../../../errors/handleError'
 
 export default function tracksListRoutes(fastify: FastifyInstance, loader: TrackLoader): void {
   fastify.get('/tracks', {
@@ -24,7 +25,7 @@ export default function tracksListRoutes(fastify: FastifyInstance, loader: Track
 
         sendSuccess(reply, { tracks })
       } catch (err) {
-        sendError(reply, (err as Error).message, 500)
+        handleError(reply, err)
       }
     },
   })
