@@ -57,12 +57,15 @@ jobs:
           echo "Aguardando API subir..."
           for i in $(seq 1 30); do
             if curl -sf http://localhost:3000/api/v1/health > /dev/null; then
-              echo "API pronta!"
-              break
+              echo "API pronta na tentativa $i!"
+              exit 0
             fi
             echo "Tentativa $i/30 — aguardando 3s..."
             sleep 3
           done
+          echo "ERRO: API não respondeu após 90s"
+          docker compose logs ethos-api  # imprime logs para diagnóstico
+          exit 1
 
       # ── Setup testes ───────────────────────
       - name: Checkout ethos-qa
