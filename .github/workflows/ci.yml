@@ -6,29 +6,29 @@ on:
     branches: [main, homolog, develop]
 
 jobs:
+  # ─────────────────────────────────────────
+  # 1. BUILD & LINT
+  # ─────────────────────────────────────────
   ci:
+    name: Build & Lint
     runs-on: ubuntu-latest
+
     steps:
-      # 1️⃣ Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
 
-      # 3️⃣ Dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Lint
       - name: Run lint
         run: npm run lint --if-present
 
-      # 5️⃣ Generate Prisma Client + Build
       - name: Build
         env:
           DATABASE_URL: "postgresql://user:password@localhost:5432/pipoca"
@@ -36,9 +36,96 @@ jobs:
           npx prisma generate
           npm run build
 
-      # 6️⃣ Deploy Dev
-      - name: Deploy Dev
-        if: github.event_name == 'push'
+  # ─────────────────────────────────────────
+  # 2. API TESTS
+  # Stack sobe uma vez — smoke bloqueia full suite
+  # ─────────────────────────────────────────
+  api-tests:
+    name: API Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Stack ──────────────────────────────
+      - name: Checkout ethos-api
+        uses: actions/checkout@v4
+
+      - name: Start stack via Docker Compose
+        run: docker compose up -d
+
+      - name: Wait for API to be ready
+        run: |
+          echo "Aguardando API subir..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/api/v1/health > /dev/null; then
+              echo "API pronta na tentativa $i!"
+              exit 0
+            fi
+            echo "Tentativa $i/30 — aguardando 3s..."
+            sleep 3
+          done
+          echo "ERRO: API não respondeu após 90s"
+          docker compose logs ethos-api  # imprime logs para diagnóstico
+          exit 1
+
+      # ── Setup testes ───────────────────────
+      - name: Checkout ethos-qa
+        uses: actions/checkout@v4
+        with:
+          repository: LucasMCFidelis/ethos-qa
+          path: cypress-tests
+
+      - name: Setup Node (testes)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: cypress-tests/package-lock.json
+
+      - name: Install Cypress dependencies
+        working-directory: cypress-tests
+        run: npm ci
+
+      # ── Smoke ──────────────────────────────
+      - name: Run smoke tests (@smoke)
+        working-directory: cypress-tests
+        env:
+          API_URL: http://localhost:3000/api/v1
+        run: npm run cy:api -- --expose grepTags=@smoke
+
+      # ── Full suite (só chega aqui se smoke passou) ──
+      - name: Run full suite (all tags)
+        working-directory: cypress-tests
+        env:
+          API_URL: http://localhost:3000/api/v1
+        run: npm run cy:api -- --expose grepTags="-@smoke"
+
+      # ── Artefatos ──────────────────────────
+      - name: Upload artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            cypress-tests/cypress/screenshots
+            cypress-tests/cypress/videos
+          retention-days: 7
+
+      # ── Teardown ───────────────────────────
+      - name: Teardown stack
+        if: always()
+        run: docker compose down -v
+
+  # ─────────────────────────────────────────
+  # 3. DEPLOY DEV
+  # ─────────────────────────────────────────
+  deploy-dev:
+    name: Deploy Dev
+    runs-on: ubuntu-latest
+    needs: [ci, api-tests]
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Trigger Render deploy
         env:
           deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL_DEV }}
         run: curl "$deploy_url"
