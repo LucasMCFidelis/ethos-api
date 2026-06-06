@@ -32,8 +32,8 @@
       "text": "Há declarações de cooperação ou incentivo indevido para o usuário compartilhar dados?",
       "description": "Exemplo: bloqueio de acesso, desconto condicionado, sorteio vinculado à coleta)",
       "options": {
-        "sim": { "next": "q5" },
-        "nao": { "next": "alto_risco" }
+        "sim": { "next": "alto_risco" },
+        "nao": { "next": "q5" }
       }
     },
     "q5": {
