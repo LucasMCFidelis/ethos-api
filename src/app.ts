@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import healthRoutes from './routes/health'
 import swaggerPlugin from './plugins/swagger'
+import keepAlivePlugin from './plugins/keepAlive'
 import simulationRoutes from './routes/simulation'
 
 const server = Fastify({
@@ -19,6 +20,7 @@ server.register(cors, {
 })
 
 server.register(swaggerPlugin)
+server.register(keepAlivePlugin)
 server.get('/', (_, reply) => reply.redirect('/api/v1/docs'))
 server.register(
   async (api) => {
