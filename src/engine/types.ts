@@ -34,6 +34,7 @@ export interface SessionState {
   currentQuestionId: string
   answeredCount: number
   answers: AnswerRecord[]
+  expiresAt: Date | null
 }
 
 export interface AnswerRecord {

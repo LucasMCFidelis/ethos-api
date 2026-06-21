@@ -15,3 +15,12 @@ export class NotFoundError extends Error {
     this.name = 'NotFoundError'
   }
 }
+
+export class GoneError extends Error {
+  statusCode = 410
+
+  constructor(message: string) {
+    super(message)
+    this.name = 'GoneError'
+  }
+}

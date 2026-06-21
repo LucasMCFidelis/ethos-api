@@ -92,6 +92,17 @@ export const sessionAnswerRegisterResponseSchema = {
       },
     },
   },
+  410: {
+    description: 'Sessão expirou',
+    type: 'object',
+    properties: {
+      ok: { type: 'boolean', example: false },
+      error: {
+        type: 'string',
+        example: 'Essa sessão não está mais disponível. Inicie uma nova consulta para continuar.',
+      },
+    },
+  },
   500: {
     description: 'Erro interno ao processar a resposta',
     type: 'object',

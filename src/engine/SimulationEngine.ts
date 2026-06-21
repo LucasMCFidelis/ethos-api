@@ -12,7 +12,7 @@ import type {
 import type { TrackLoader } from './TrackLoader'
 import type { ResultCalculator } from './ResultCalculator'
 import { prisma } from '../lib/prisma'
-import { BadRequestError, NotFoundError } from '../errors/httpErrors'
+import { BadRequestError, GoneError, NotFoundError } from '../errors/httpErrors'
 
 const MAX_QUESTIONS = 5
 
@@ -35,7 +35,9 @@ export class SimulationEngine {
   async start(trackId: string): Promise<{ sessionId: string } & NextStepResponse> {
     const track = this.loader.load(trackId)
 
-    const { id: sessionId } = await prisma.session.create({ data: { trackId } })
+    const { id: sessionId } = await prisma.session.create({
+      data: { trackId, expiresAt: this.getNewExpiresAtDate() },
+    })
 
     const question = track.questions['q1']
 
@@ -106,6 +108,7 @@ export class SimulationEngine {
    */
   async answer(sessionId: string, questionId: string, answer: AnswerOption): Promise<StepResponse> {
     const session = await this.getSession(sessionId)
+    this.checkExpiration(session.expiresAt)
     const track = this.loader.load(session.trackId)
 
     const question = track.questions[questionId]
@@ -121,12 +124,17 @@ export class SimulationEngine {
       )
     }
 
-    // Registra a resposta
-    await prisma.sessionAnswer.upsert({
-      where: { sessionId_questionId: { sessionId, questionId } },
-      create: { sessionId, questionId, answer },
-      update: { answer, answeredAt: new Date() },
-    })
+    await prisma.$transaction([
+      prisma.sessionAnswer.upsert({
+        where: { sessionId_questionId: { sessionId, questionId } },
+        create: { sessionId, questionId, answer },
+        update: { answer, answeredAt: new Date() },
+      }),
+      prisma.session.update({
+        where: { id: sessionId },
+        data: { expiresAt: this.getNewExpiresAtDate() },
+      }),
+    ])
 
     const nextKey = chosen.next
 
@@ -225,6 +233,7 @@ export class SimulationEngine {
       trackId: session.trackId,
       currentQuestionId: session.currentQuestionId,
       answeredCount: session.answers.length,
+      expiresAt: session.expiresAt,
       answers: session.answers.map((a) => ({
         questionId: a.questionId,
         answer: a.answer,
@@ -252,6 +261,20 @@ export class SimulationEngine {
         level: result.level,
         actions: result.actions,
       },
+    }
+  }
+
+  private getNewExpiresAtDate(): Date {
+    const DEFAULT_SESSION_TIME_MILLISECONDS = 1800000 // 30 minutos
+    return new Date(Date.now() + DEFAULT_SESSION_TIME_MILLISECONDS)
+  }
+
+  private checkExpiration(expiresAt: Date | null): void {
+    if (!expiresAt) return
+    if (new Date() > expiresAt) {
+      throw new GoneError(
+        'Essa sessão não está mais disponível. Inicie uma nova consulta para continuar.',
+      )
     }
   }
 
