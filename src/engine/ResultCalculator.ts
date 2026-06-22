@@ -8,6 +8,7 @@ export interface CalculatedResult {
   action_type: string
   level: string
   actions: string[]
+  fonts?: Array<{ label: string; url?: string }>
 }
 
 export class ResultCalculator {
@@ -32,6 +33,7 @@ export class ResultCalculator {
       action_type: band.action_type,
       level: band.level,
       actions: band.actions,
+      fonts: band.fonts,
     }
   }
 }

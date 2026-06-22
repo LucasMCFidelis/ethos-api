@@ -90,6 +90,7 @@ export class TrackLoader {
       description: raw.description as string,
       questions,
       results,
+      fonts: raw.fonts as Array<{ label: string; url?: string }>,
     }
   }
 
@@ -168,16 +169,55 @@ export class TrackLoader {
         throw new BadRequestError(`Resultado "${key}": campo "actions" deve ser um array.`)
       }
 
+      const fonts = this.validateFonts(r.fonts, key)
+
       results[key] = {
         label: r.label as string,
         description: r.description as string,
         action_type: r.action_type as string,
         level: r.level as string,
         actions: r.actions as string[],
+        fonts,
       }
     }
 
     return results
+  }
+
+  private validateFonts(
+    raw: unknown,
+    resultKey: string,
+  ): Array<{ label: string; url?: string }> | undefined {
+    if (raw === undefined || raw === null) return undefined
+
+    if (!Array.isArray(raw)) {
+      throw new BadRequestError(`Resultado "${resultKey}": campo "fonts" deve ser um array.`)
+    }
+
+    return raw.map((font, index) => {
+      if (typeof font !== 'object' || font === null) {
+        throw new BadRequestError(`Resultado "${resultKey}", fonts[${index}]: deve ser um objeto.`)
+      }
+
+      const f = font as Record<string, unknown>
+
+      if (typeof f.label !== 'string' || f.label.trim() === '') {
+        throw new BadRequestError(
+          `Resultado "${resultKey}", fonts[${index}]: campo "label" ausente ou vazio.`,
+        )
+      }
+
+      if (f.url !== undefined && typeof f.url !== 'string') {
+        throw new BadRequestError(
+          `Resultado "${resultKey}", fonts[${index}]: campo "url" deve ser string.`,
+        )
+      }
+
+      return {
+        label: f.label,
+        ...(f.url !== undefined && { url: f.url as string }),
+      }
+    })
   }
 
   // ------------------------------------------------------------------ //

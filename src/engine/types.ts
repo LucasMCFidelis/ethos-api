@@ -18,6 +18,7 @@ export interface TrackResult {
   action_type: string
   level: string
   actions: string[]
+  fonts?: Array<{ label: string; url?: string }>
 }
 
 export interface Track {
@@ -26,6 +27,7 @@ export interface Track {
   description: string
   questions: Record<string, Question>
   results: Record<string, TrackResult>
+  fonts?: Array<{ label: string; url?: string }>
 }
 
 export interface SessionState {
@@ -73,6 +75,7 @@ export interface FinishedStepResponse {
     action_type: string
     level: string
     actions: string[]
+    fonts?: Array<{ label: string; url?: string }>
   }
 }
 

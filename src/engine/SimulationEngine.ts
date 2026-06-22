@@ -250,7 +250,6 @@ export class SimulationEngine {
     resultKey: string,
   ): FinishedStepResponse {
     const result = this.calculator.resolve(track, resultKey)
-
     return {
       finished: true,
       result: {
@@ -260,6 +259,7 @@ export class SimulationEngine {
         action_type: result.action_type,
         level: result.level,
         actions: result.actions,
+        fonts: result.fonts,
       },
     }
   }

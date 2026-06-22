@@ -51,7 +51,8 @@
       "description": "A plataforma Ethos está focando em dilemas de confidencialidade e dados sensíveis. No momento, não poderemos ajudar com outros tipos de dilema.",
       "action_type": "",
       "level": "",
-      "actions": []
+      "actions": [],
+      "fonts": []
     },
     "alto_risco": {
       "label": "Risco Regulatório",
@@ -64,6 +65,12 @@
         "Reavaliar necessidades dos dados",
         "Registrar motivos de não-validação",
         "Validar com Jurídico (Multas e LGPD)"
+      ],
+      "fonts": [
+        {
+          "label": "LGPD — Lei nº 13.709/2018, arts. 6º, 8º, 9º e 11.",
+          "url": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+        }
       ]
     },
     "moderado": {
@@ -71,7 +78,13 @@
       "description": "O uso dos dados está aceitável, mas devido à natureza dos riscos envolvidos, é necessário maior atenção e monitoramento.",
       "action_type": "Monitoramento",
       "level": "Elevado",
-      "actions": ["Revisão jurídica adicional", "Monitoramento mais rigoroso"]
+      "actions": ["Revisão jurídica adicional", "Monitoramento mais rigoroso"],
+      "fonts": [
+        {
+          "label": "LGPD — Lei nº 13.709/2018, arts. 6º, 8º, 9º e 11.",
+          "url": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+        }
+      ]
     },
     "aceitavel": {
       "label": "Uso Aceitável",
@@ -83,6 +96,12 @@
         "Documentar riscos e proteções",
         "Monitorar impacto",
         "Revisar periodicamente"
+      ],
+      "fonts": [
+        {
+          "label": "LGPD — Lei nº 13.709/2018, arts. 6º e 11.",
+          "url": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+        }
       ]
     }
   }
