@@ -12,7 +12,7 @@
       }
     },
     "q2": {
-      "text": "O paciente está em situação de urgência. Você registra os dados mesmo sem consentimento formal?",
+      "text": "O usuário tem ciência do que estamos fazendo com os dados?",
       "description": "Finalidade, quem tem acesso, quanto tempo ficam armazenados",
       "options": {
         "sim": { "next": "q3" },
